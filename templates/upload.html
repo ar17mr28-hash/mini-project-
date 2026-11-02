@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Sonar Image - AquaSentinel{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+  <div style="margin-bottom: 24px; text-align: center;">
+    <h1 style="font-size: 2rem; font-weight: 800; color: #ffffff;">Sonar Image Analysis</h1>
+    <p style="font-size: 0.95rem; color: var(--text-secondary);">
+      Upload a side-scan sonar image or select a pre-loaded acoustic sample to execute computer vision detection.
+    </p>
+  </div>
+
+  <!-- Upload Form -->
+  <form id="uploadForm" action="{{ url_for('analyze') }}" method="POST" enctype="multipart/form-data">
+    <input type="hidden" id="demoSampleInput" name="demo_sample" value="">
+
+    <!-- Drag & Drop Zone -->
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card-body">
+        <div id="dropzone" class="upload-dropzone">
+          <input type="file" id="sonarFileInput" name="sonar_file" class="file-input-hidden" accept=".jpg,.jpeg,.png">
+          
+          <div class="upload-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          
+          <div class="upload-title">Drag & drop side-scan sonar image here</div>
+          <div class="upload-hint">or click to browse from local computer &bull; Supported formats: JPG, JPEG, PNG (Max 16 MB)</div>
+          
+          <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('sonarFileInput').click()">
+            Browse Files
+          </button>
+        </div>
+
+        <!-- Image Preview Panel (Module 2) -->
+        <div id="previewPanel" class="preview-panel">
+          <div class="preview-grid">
+            <div class="preview-img-container">
+              <img id="previewImg" src="" alt="Sonar preview">
+            </div>
+            <div class="preview-info">
+              <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--cyan-primary); font-weight: 700;">
+                Selected Sonar Frame
+              </div>
+              <div id="previewName" style="font-size: 1.05rem; font-weight: 700; color: #ffffff;">filename.jpg</div>
+              <div class="preview-meta">
+                <span>File Size: <strong id="previewSize">--</strong></span> &bull; 
+                <span>Resolution: <strong id="previewDim">--</strong></span>
+              </div>
+              <div style="margin-top: 10px;">
+                <button type="submit" id="analyzeBtn" class="btn btn-primary btn-lg" style="width: 100%;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  Analyze Sonar Image
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+  <!-- Pre-loaded Sonar Samples Shelf for Instant Faculty Demo -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        Instant Demonstration Samples (Pre-Loaded Side-Scan Scans)
+      </div>
+      <span class="nav-badge">1-Click Test</span>
+    </div>
+    <div class="card-body">
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 14px;">
+        Click any sample below to instantly load and test the computer vision pipeline without searching for external files:
+      </p>
+
+      <div class="samples-shelf">
+        {% for sample in demo_samples %}
+        <div class="sample-card" data-filename="{{ sample.filename }}" data-url="{{ sample.url }}" data-name="{{ sample.name }}">
+          <div class="sample-thumb">
+            <img src="{{ sample.url }}" alt="{{ sample.name }}">
+          </div>
+          <div>
+            <div class="sample-name">{{ sample.name }}</div>
+            <div class="sample-desc">
+              {% if 'shipwreck' in sample.filename %}
+                Simulated sunken hull wreckage with specular highlight & deep acoustic shadow.
+              {% elif 'pipeline' in sample.filename %}
+                Submerged linear pipeline geometry and entangled ghost fishing net anomaly.
+              {% else %}
+                Normal baseline seabed acoustic backscatter with standard sand ripple texture.
+              {% endif %}
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline-cyan btn-sm" style="margin-top: auto;">
+            Select This Sample
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

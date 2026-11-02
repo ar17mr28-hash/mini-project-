@@ -1,0 +1,22 @@
+# Python byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# User uploads & processed analysis cache
+uploads/*
+!uploads/.gitkeep
+processed/*
+!processed/.gitkeep

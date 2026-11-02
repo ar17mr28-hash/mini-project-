@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}AquaSentinel - Sonar Research Dashboard{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+  <div>
+    <h1 style="font-size: 1.8rem; font-weight: 800; color: #ffffff;">Sonar Research Dashboard</h1>
+    <p style="font-size: 0.9rem; color: var(--text-secondary);">Real-time telemetry and detection activity monitoring.</p>
+  </div>
+  <div style="display: flex; gap: 10px;">
+    <a href="{{ url_for('upload_page') }}" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+      Upload New Sonar Image
+    </a>
+  </div>
+</div>
+
+<!-- Telemetry Metric Cards (Module 1) -->
+<div class="metric-grid">
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-label">Total Images Analyzed</span>
+      <div class="metric-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+      </div>
+    </div>
+    <div class="metric-value">{{ metrics.total_images }}</div>
+    <div class="metric-sub">Side-scan sonar frames processed</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-label">Total Possible Anomalies</span>
+      <div class="metric-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </div>
+    </div>
+    <div class="metric-value" style="color: var(--cyan-primary);">{{ metrics.total_anomalies }}</div>
+    <div class="metric-sub">Candidate bounding box regions</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-label">High Suspicion Detections</span>
+      <div class="metric-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+    </div>
+    <div class="metric-value" style="color: #f87171;">{{ metrics.high_suspicion_count }}</div>
+    <div class="metric-sub">Severe acoustic backscatter shifts</div>
+  </div>
+
+  <div class="metric-card">
+    <div class="metric-header">
+      <span class="metric-label">Average Heuristic Score</span>
+      <div class="metric-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+      </div>
+    </div>
+    <div class="metric-value" style="color: #38bdf8;">{{ metrics.avg_score }}</div>
+    <div class="metric-sub">Scale 0 - 100 (Heuristic rule score)</div>
+  </div>
+</div>
+
+<!-- Two-Column Layout: Recent Activity & Quick Upload Helper -->
+<div style="display: grid; grid-template-columns: 1.4fr 0.6fr; gap: 24px;">
+  <!-- Recent Analysis Activity (Module 1) -->
+  <div class="card" style="margin-bottom: 0;">
+    <div class="card-header">
+      <div class="card-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        Recent Sonar Analysis Activity
+      </div>
+      <a href="{{ url_for('history_page') }}" class="btn btn-outline-cyan btn-sm">View Full History</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+      {% if records %}
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Preview</th>
+              <th>Sonar File</th>
+              <th>Timestamp</th>
+              <th>Candidates</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in records[:6] %}
+            <tr>
+              <td>
+                <img src="{{ url_for('serve_processed', filename=item.files.annotated) }}" class="table-thumb" alt="Annotated thumbnail">
+              </td>
+              <td>
+                <div style="font-weight: 600; color: #ffffff;">{{ item.original_filename }}</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted);">ID: #{{ item.id }} &bull; {{ item.dimensions.width }}x{{ item.dimensions.height }}px</div>
+              </td>
+              <td style="font-family: monospace; font-size: 0.8rem;">{{ item.timestamp }}</td>
+              <td>
+                <span style="font-weight: 700; color: var(--cyan-primary); font-size: 0.95rem;">{{ item.candidate_count }}</span>
+              </td>
+              <td>
+                <span class="status-badge badge-{{ item.status_class }}">{{ item.status }}</span>
+              </td>
+              <td>
+                <a href="{{ url_for('view_results', analysis_id=item.id) }}" class="btn btn-secondary btn-sm">
+                  View Results
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+        <p>No sonar scans analyzed yet.</p>
+        <a href="{{ url_for('upload_page') }}" class="btn btn-primary btn-sm" style="margin-top: 12px;">Start First Scan</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Sonar Specs & System Info Widget -->
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="card" style="margin-bottom: 0;">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+          </svg>
+          Computer Vision Engine
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.85rem;">
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0,229,255,0.1); padding-bottom: 8px;">
+            <span style="color: var(--text-muted);">Pipeline Version:</span>
+            <strong style="color: var(--cyan-primary);">v1.0 (Classical CV)</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0,229,255,0.1); padding-bottom: 8px;">
+            <span style="color: var(--text-muted);">Contrast Enhancement:</span>
+            <span style="color: #ffffff;">CLAHE (Clip: 2.0, Grid: 8x8)</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0,229,255,0.1); padding-bottom: 8px;">
+            <span style="color: var(--text-muted);">Noise Suppression:</span>
+            <span style="color: #ffffff;">Gaussian 5x5 Kernel</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0,229,255,0.1); padding-bottom: 8px;">
+            <span style="color: var(--text-muted);">Boundary Detection:</span>
+            <span style="color: #ffffff;">Canny Adaptive Median</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">Target Geometry:</span>
+            <span style="color: #ffffff;">Contour Morphology</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Academic Note -->
+    <div style="background: rgba(12, 21, 41, 0.7); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: var(--radius-lg); padding: 20px;">
+      <h4 style="font-size: 0.95rem; color: var(--cyan-primary); margin-bottom: 8px;">Academic Note</h4>
+      <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
+        This prototype represents an automated image-processing heuristic baseline (~30% mini-project scope). 
+        Outputs indicate <strong>possible anomalies</strong> requiring operator inspection, not trained machine learning classifications.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

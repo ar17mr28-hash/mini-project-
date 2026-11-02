@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}AquaSentinel - Underwater Sonar Debris & Anomaly Detection{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        Academic Mini-Project Prototype &bull; Computer Vision Demonstration
+      </div>
+      <h1 class="hero-title">
+        Autonomous <span class="gradient-text">Sonar Anomaly</span> & Marine Debris Detection
+      </h1>
+      <p class="hero-desc">
+        AquaSentinel applies classical computer vision techniques (Gaussian noise suppression, 
+        Contrast-Limited Adaptive Histogram Equalization, Canny edge detection, and statistical segmentation) 
+        to side-scan sonar imagery to reliably detect suspicious underwater candidate anomalies.
+      </p>
+      <div class="hero-actions">
+        <a href="{{ url_for('upload_page') }}" class="btn btn-primary btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Upload Sonar Image
+        </a>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          Research Dashboard
+        </a>
+        <a href="{{ url_for('presentation_page') }}" class="btn btn-outline-cyan btn-lg">
+          Faculty Defense
+        </a>
+      </div>
+    </div>
+
+    <!-- Animated Sonar Radar Visual -->
+    <div class="radar-widget-card">
+      <div class="sonar-radar">
+        <div class="grid-ring-1"></div>
+        <div class="grid-ring-2"></div>
+        <div class="crosshair-x"></div>
+        <div class="crosshair-y"></div>
+        <div class="sonar-sweep"></div>
+        <div class="radar-target target-1"></div>
+        <div class="radar-target target-2"></div>
+      </div>
+      <div class="radar-caption">
+        ACOUSTIC SWEEP &bull; 455 kHz SIDE-SCAN SIMULATOR
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Telemetry Summary Grid -->
+<section style="margin-bottom: 40px;">
+  <div class="metric-grid">
+    <div class="metric-card">
+      <div class="metric-header">
+        <span class="metric-label">Total Sonar Scans</span>
+        <div class="metric-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </div>
+      </div>
+      <div class="metric-value">{{ metrics.total_images }}</div>
+      <div class="metric-sub">Analyzed side-scan acoustic frames</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <span class="metric-label">Candidate Anomalies</span>
+        <div class="metric-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+      </div>
+      <div class="metric-value" style="color: var(--cyan-primary);">{{ metrics.total_anomalies }}</div>
+      <div class="metric-sub">Localized bounding box candidates</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <span class="metric-label">High Suspicion Scans</span>
+        <div class="metric-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+      </div>
+      <div class="metric-value" style="color: #f87171;">{{ metrics.high_suspicion_count }}</div>
+      <div class="metric-sub">Prominent seabed backscatter shifts</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <span class="metric-label">Average Heuristic Index</span>
+        <div class="metric-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
+      </div>
+      <div class="metric-value" style="color: #38bdf8;">{{ metrics.avg_score }}</div>
+      <div class="metric-sub">Heuristic anomaly density score</div>
+    </div>
+  </div>
+</section>
+
+<!-- Marine Target Scope & Capabilities -->
+<section class="card">
+  <div class="card-header">
+    <div class="card-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+        <path d="M2 12h20"></path>
+      </svg>
+      Acoustic Target Classes in Marine Debris Monitoring
+    </div>
+    <span class="nav-badge">Heuristic Classification</span>
+  </div>
+  <div class="card-body">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+      <div style="background: rgba(6, 11, 23, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px;">
+        <h4 style="color: var(--cyan-primary); margin-bottom: 8px;">⚓ Underwater Debris & Containers</h4>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+          Hard man-made structures present intense acoustic backscatter reflections accompanied by clear acoustic shadow voids opposite the sonar tow-fish.
+        </p>
+      </div>
+      <div style="background: rgba(6, 11, 23, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px;">
+        <h4 style="color: var(--cyan-primary); margin-bottom: 8px;">🕸️ Ghost Fishing Nets</h4>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+          Abandoned synthetic fishing nets snagged on reefs or sediments produce diffuse, high-entropy cluster boundaries and localized acoustic dispersion.
+        </p>
+      </div>
+      <div style="background: rgba(6, 11, 23, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px;">
+        <h4 style="color: var(--cyan-primary); margin-bottom: 8px;">📏 Subsea Pipelines & Cables</h4>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+          Continuous elongated linear geometries identified through morphological aspect ratio analysis (high width-to-height structural ratios).
+        </p>
+      </div>
+      <div style="background: rgba(6, 11, 23, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px;">
+        <h4 style="color: var(--cyan-primary); margin-bottom: 8px;">🚢 Sunken Hull Wreckage</h4>
+        <p style="font-size: 0.85rem; color: var(--text-secondary);">
+          Extensive multi-component metallic debris with extensive acoustic occlusion shadows, requiring multi-scale contour segmentation.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Launch Callout -->
+<div style="background: linear-gradient(135deg, rgba(0, 119, 182, 0.25) 0%, rgba(0, 229, 255, 0.1) 100%); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: var(--radius-lg); padding: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+  <div>
+    <h3 style="font-size: 1.3rem; color: #ffffff; margin-bottom: 6px;">Ready to run sonar image analysis?</h3>
+    <p style="font-size: 0.9rem; color: var(--text-secondary);">Upload your side-scan sonar image or pick from our built-in acoustic test cases.</p>
+  </div>
+  <a href="{{ url_for('upload_page') }}" class="btn btn-primary btn-lg">
+    Launch Sonar Analyzer &rarr;
+  </a>
+</div>
+{% endblock %}
